@@ -1,5 +1,9 @@
 const express = require("express");
 const Book = require("../models/book");
+const ExpressError = require('../expressError');
+const jsonschema = require('jsonschema');
+const createBookSchema = require("../schemata/createBook.json");
+const updateBookSchema = require('../schemata/updateBook.json');
 
 const router = new express.Router();
 
@@ -29,8 +33,16 @@ router.get("/:id", async function (req, res, next) {
 /** POST /   bookData => {book: newBook}  */
 
 router.post("/", async function (req, res, next) {
+  const result = await jsonschema.validate(req.body, createBookSchema);
+
+  if (!result.valid) {
+    let listOfErrors = result.errors.map(error => error.stack);
+    let err = new ExpressError(listOfErrors, 400);
+    return next(err);
+  }
+  const newBook = req.body;
   try {
-    const book = await Book.create(req.body);
+    const book = await Book.create(newBook);
     return res.status(201).json({ book });
   } catch (err) {
     return next(err);
@@ -40,9 +52,20 @@ router.post("/", async function (req, res, next) {
 /** PUT /[isbn]   bookData => {book: updatedBook}  */
 
 router.put("/:isbn", async function (req, res, next) {
+  const result = jsonschema.validate(req.body, updateBookSchema);
+
+  if (!result.valid) {
+    let listOfErrors = result.errors.map(error => error.stack);
+    let err = new ExpressError(listOfErrors, 400);
+    return next(err);
+  }
+  const updatedBook = req.body;
   try {
-    const book = await Book.update(req.params.isbn, req.body);
-    return res.json({ book });
+    if (updatedBook.isbn === req.params.isbn) {
+      const book = await Book.update(updatedBook);
+      return res.json({ book });
+    }
+    else return (new ExpressError("ISBN does not match"))
   } catch (err) {
     return next(err);
   }
