@@ -65,7 +65,7 @@ router.put("/:isbn", async function (req, res, next) {
       const book = await Book.update(updatedBook);
       return res.json({ book });
     }
-    else return (new ExpressError("ISBN does not match"))
+    else throw (new ExpressError("ISBN does not match"))
   } catch (err) {
     return next(err);
   }

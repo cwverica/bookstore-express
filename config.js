@@ -9,13 +9,13 @@ let DB_URI = `postgresql://`;
 
 if (MY_DB_USER) {
   if (process.env.NODE_ENV === "test") {
-    DB_URI = `${DB_URI}${MY_DB_USER}:${MY_DB_PW}@localHost:5432/books-test`
+    DB_URI = `${DB_URI}${MY_DB_USER}:${MY_DB_PW}@localHost:5432/books_test`
   } else {
     DB_URI = `${DB_URI}${MY_DB_USER}:${MY_DB_PW}@localHost:5432/books`
   }
 } else {
   if (process.env.NODE_ENV === "test") {
-    DB_URI = `${DB_URI}/books-test`;
+    DB_URI = `${DB_URI}/books_test`;
   } else {
     DB_URI = process.env.DATABASE_URL || `${DB_URI}/books`;
   }
